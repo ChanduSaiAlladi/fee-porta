@@ -17,7 +17,8 @@ const __dirname = path.dirname(__filename);
 app.use(express.static(__dirname));
 
 // MongoDB connection
-mongoose.connect("mongodb://127.0.0.1:27017/feeportal", {
+const mongoUri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/feeportal";
+mongoose.connect(mongoUri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => console.log("✅ MongoDB Connected"))
@@ -180,6 +181,11 @@ app.get("/", (req, res) => {
   res.redirect("/signup.html");
 });
 
-// Start server
-const PORT = 3000;
-app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+// Start server locally
+const PORT = process.env.PORT || 3000;
+if (import.meta.url === `file://${process.argv[1]}`) {
+  app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+}
+
+// For Vercel serverless
+export default app;
