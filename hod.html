@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HOD Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+      color: white;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .page-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 300;
+    }
+
+    .admin-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 8px 16px;
+      border-radius: 20px;
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      backdrop-filter: blur(10px);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      border-radius: 16px;
+      padding: 25px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: #6b7280;
+      font-size: 14px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section-title {
+      color: #1a1a2e;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 3px;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      border-radius: 2px;
+      margin-left: 15px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .requests-table {
+      width: 100%;
+      background: white;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 16px;
+      min-width: 800px;
+    }
+
+    .requests-table thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .requests-table th {
+      padding: 18px 15px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .requests-table td {
+      padding: 18px 15px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .requests-table tr:hover {
+      background-color: rgba(102, 126, 234, 0.05);
+      transform: scale(1.002);
+    }
+
+    .requests-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+      background: rgba(251, 191, 36, 0.2);
+      color: #d97706;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .status-approved {
+      background: rgba(16, 185, 129, 0.2);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-rejected {
+      background: rgba(239, 68, 68, 0.2);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .status-paid {
+      background: rgba(59, 130, 246, 0.2);
+      color: #1d4ed8;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .select-btn {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .select-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .details-card {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-left: 4px solid #667eea;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .detail-item {
+      background: rgba(255, 255, 255, 0.7);
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #374151;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .detail-value {
+      color: #667eea;
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    .hide-btn {
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .hide-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(107, 114, 128, 0.4);
+    }
+
+    .hod-form {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input, .form-select {
+      padding: 15px 18px;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .form-select {
+      cursor: pointer;
+    }
+
+    .submit-btn {
+      padding: 18px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 10px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(16, 185, 129, 0.4);
+    }
+
+    .submit-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    .empty-message {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .floating-shapes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .shape {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .shape:nth-child(1) {
+      width: 80px;
+      height: 80px;
+      top: 10%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .shape:nth-child(2) {
+      width: 120px;
+      height: 120px;
+      top: 70%;
+      right: 10%;
+      animation-delay: 2s;
+    }
+
+    .shape:nth-child(3) {
+      width: 60px;
+      height: 60px;
+      top: 50%;
+      left: 85%;
+      animation-delay: 4s;
+    }
+
+    .shape:nth-child(4) {
+      width: 100px;
+      height: 100px;
+      top: 30%;
+      left: 25%;
+      animation-delay: 1s;
+    }
+
+    .shape:nth-child(5) {
+      width: 90px;
+      height: 90px;
+      top: 60%;
+      left: 60%;
+      animation-delay: 3s;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-30px) rotate(180deg);
+      }
+    }
+
+    .message {
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-weight: 500;
+      position: relative;
+      z-index: 1;
+      animation: slideIn 0.3s ease;
+    }
+
+    .message.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: #059669;
+    }
+
+    .message.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #dc2626;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .filter-section {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-input {
+      padding: 10px 15px;
+      border: 2px solid #e1e5e9;
+      border-radius: 10px;
+      font-size: 14px;
+      min-width: 200px;
+      transition: all 0.3s ease;
+    }
+
+    .filter-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .filter-btn {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .refresh-btn {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 2rem;
+      }
+      .card {
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .requests-table th,
+      .requests-table td {
+        padding: 12px 10px;
+        font-size: 13px;
+      }
+      .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .filter-input {
+        min-width: auto;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 15px;
+      }
+      .page-title {
+        font-size: 1.5rem;
+      }
+      .card {
+        padding: 15px;
+      }
+      .stat-card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">HOD Dashboard</h1>
+      <p class="page-subtitle">Comprehensive oversight of all student fee requests</p>
+      <div class="admin-badge">Administrator Access</div>
+    </div>
+
+    <div class="stats-grid" id="statsContainer">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-number" id="totalRequests">-</div>
+        <div class="stat-label">Total Requests</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-number" id="pendingRequests">-</div>
+        <div class="stat-label">Pending</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-number" id="approvedRequests">-</div>
+        <div class="stat-label">Approved</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">❌</div>
+        <div class="stat-number" id="rejectedRequests">-</div>
+        <div class="stat-label">Rejected</div>
+      </div>
+    </div>
+
+    <div id="messageContainer"></div>
+
+    <div class="card">
+      <h2 class="section-title">📋 All Fee Requests</h2>
+      
+      <div class="filter-section">
+        <input type="text" id="searchInput" placeholder="Search by name or registration..." class="filter-input">
+        <select id="statusFilter" class="filter-input" style="min-width: 150px;">
+          <option value="">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+          <option value="Paid">Paid</option>
+        </select>
+        <button onclick="applyFilters()" class="filter-btn">🔍 Filter</button>
+        <button onclick="clearFilters()" class="filter-btn" style="background: #6b7280;">Clear</button>
+        <button onclick="loadRequests()" class="refresh-btn">🔄 Refresh</button>
+      </div>
+
+      <div class="table-container">
+        <table class="requests-table">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Student Name</th>
+              <th>Reg Number</th>
+              <th>Fee Type</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Faculty</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="requestsTableBody">
+            <tr>
+              <td colspan="8" class="empty-state">
+                <div class="empty-icon">📋</div>
+                <div class="empty-message">Loading requests...</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="selectedDetails" class="card details-card hidden">
+      <h2 class="section-title">👤 Selected Student Details</h2>
+      <div class="details-grid">
+        <div class="detail-item">
+          <div class="detail-label">Student Name</div>
+          <div class="detail-value" id="detailStudentName"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Registration Number</div>
+          <div class="detail-value" id="detailRegNumber"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Academic Year</div>
+          <div class="detail-value" id="detailYear"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Branch</div>
+          <div class="detail-value" id="detailBranch"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Section</div>
+          <div class="detail-value" id="detailSection"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Fee Type</div>
+          <div class="detail-value" id="detailFeeType"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Amount</div>
+          <div class="detail-value" id="detailAmount"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">CRT Fee</div>
+          <div class="detail-value" id="detailCrtFee"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Attendance</div>
+          <div class="detail-value" id="detailAttendance"></div>
+        </div>
+      </div>
+      <button onclick="hideDetails()" class="hide-btn">Hide Details</button>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">⚙️ Update Request Status</h2>
+      <form id="hodForm" class="hod-form">
+        <div class="form-group">
+          <label class="form-label">Request ID</label>
+          <input type="text" id="requestId" placeholder="Request ID" required class="form-input" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="status" required class="form-select">
+            <option value="Pending">⏳ Pending</option>
+            <option value="Approved">✅ Approve</option>
+            <option value="Rejected">❌ Reject</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Faculty Name</label>
+          <input type="text" id="faculty" placeholder="Enter faculty name" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reason</label>
+          <input type="text" id="reason" placeholder="Reason for status change (required for rejection)" class="form-input">
+        </div>
+        <button type="submit" class="submit-btn">Update Request Status</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let selectedRequest = null;
+    let requests = [];
+    let filteredRequests = [];
+
+    function showMessage(text, type = 'success') {
+      const container = document.getElementById('messageContainer');
+      const message = document.createElement('div');
+      message.className = `message ${type}`;
+      message.textContent = text;
+      container.appendChild(message);
+      
+      setTimeout(() => {
+        if (container.contains(message)) {
+          container.removeChild(message);
+        }
+      }, 5000);
+    }
+
+    function updateStats() {
+      const total = requests.length;
+      const pending = requests.filter(r => (r.status || 'Pending') === 'Pending').length;
+      const approved = requests.filter(r => r.status === 'Approved').length;
+      const rejected = requests.filter(r => r.status === 'Rejected').length;
+
+      document.getElementById('totalRequests').textContent = total;
+      document.getElementById('pendingRequests').textContent = pending;
+      document.getElementById('approvedRequests').textContent = approved;
+      document.getElementById('rejectedRequests').textContent = rejected;
+    }
+
+    function showDetails(index) {
+      const currentRequests = filteredRequests.length > 0 ? filteredRequests : requests;
+      const request = currentRequests[index];
+      if (!request) return;
+      
+      selectedRequest = request;
+      
+      document.getElementById("detailStudentName").textContent = request.studentName || 'N/A';
+      document.getElementById("detailRegNumber").textContent = request.regNumber || 'N/A';
+      document.getElementById("detailYear").textContent = request.year || 'N/A';
+      document.getElementById("detailBranch").textContent = request.branch || 'N/A';
+      document.getElementById("detailSection").textContent = request.section || 'N/A';
+      document.getElementById("detailFeeType").textContent = request.feeType || 'N/A';
+      document.getElementById("detailAmount").textContent = `$${request.amount || '0'}`;
+      document.getElementById("detailCrtFee").textContent = `$${request.crtFee || '0'}`;
+      document.getElementById("detailAttendance").textContent = `${request.attendance || '0'}%`;
+      
+      document.getElementById("requestId").value = request._id || '';
+      document.getElementById("status").value = request.status || 'Pending';
+      document.getElementById("reason").value = request.reason || "";
+      document.getElementById("faculty").value = request.faculty || "";
+      document.getElementById("selectedDetails").classList.remove("hidden");
+      
+      // Smooth scroll to details
+      document.getElementById("selectedDetails").scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+
+    function hideDetails() {
+      document.getElementById("selectedDetails").classList.add("hidden");
+      selectedRequest = null;
+      
+      // Clear form
+      document.getElementById("requestId").value = "";
+      document.getElementById("status").value = "Pending";
+      document.getElementById("reason").value = "";
+      document.getElementById("faculty").value = "";
+    }
+
+    function getStatusBadge(status) {
+      const normalizedStatus = status || 'Pending';
+      const statusClass = normalizedStatus.toLowerCase().replace(' ', '-');
+      return `<span class="status-badge status-${statusClass}">${normalizedStatus}</span>`;
+    }
+
+    async function loadRequests() {
+      try {
+        const response = await fetch('/all-requests');
+        
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        requests = Array.isArray(data) ? data : [];
+        
+        // Ensure all requests have required fields
+        requests = requests.map(request => ({
+          ...request,
+          status: request.status || 'Pending',
+          studentName: request.studentName || 'Unknown',
+          regNumber: request.regNumber || 'N/A',
+          feeType: request.feeType || 'N/A',
+          amount: request.amount || 0,
+          crtFee: request.crtFee || 0,
+          attendance: request.attendance || '0',
+          faculty: request.faculty || 'N/A',
+          reason: request.reason || ''
+        }));
+        
+        updateStats();
+        renderTable();
+        showMessage(`Loaded ${requests.length} requests successfully!`);
+        
+      } catch (error) {
+        console.error('Error loading requests:', error);
+        showMessage(`Failed to load requests: ${error.message}`, 'error');
+        
+        // Show error state in table
+        document.getElementById("requestsTableBody").innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-state">
+              <div class="empty-icon">⚠️</div>
+              <div class="empty-message">Error loading requests. Please refresh the page or check your connection.</div>
+            </td>
+          </tr>
+        `;
+        
+        // Reset stats on error
+        document.getElementById('totalRequests').textContent = '0';
+        document.getElementById('pendingRequests').textContent = '0';
+        document.getElementById('approvedRequests').textContent = '0';
+        document.getElementById('rejectedRequests').textContent = '0';
+      }
+    }
+
+    function applyFilters() {
+      try {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+        const statusFilter = document.getElementById('statusFilter').value;
+
+        filteredRequests = requests.filter(request => {
+          const matchesSearch = !searchTerm || 
+            (request.studentName || '').toLowerCase().includes(searchTerm) ||
+            (request.regNumber || '').toLowerCase().includes(searchTerm);
+          
+          const requestStatus = request.status || 'Pending';
+          const matchesStatus = !statusFilter || requestStatus === statusFilter;
+          
+          return matchesSearch && matchesStatus;
+        });
+
+        renderTable(filteredRequests);
+        
+        if (filteredRequests.length === 0 && requests.length > 0) {
+          showMessage('No requests match your filter criteria.', 'error');
+        } else if (filteredRequests.length > 0) {
+          showMessage(`Found ${filteredRequests.length} matching requests.`);
+        }
+      } catch (error) {
+        console.error('Error applying filters:', error);
+        showMessage('Error applying filters. Please try again.', 'error');
+      }
+    }
+
+    function clearFilters() {
+      try {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('statusFilter').value = '';
+        filteredRequests = [];
+        renderTable(requests);
+        showMessage('Filters cleared. Showing all requests.');
+      } catch (error) {
+        console.error('Error clearing filters:', error);
+        showMessage('Error clearing filters. Please try again.', 'error');
+      }
+    }
+
+    function renderTable(requestsToRender = requests) {
+      const tbody = document.getElementById("requestsTableBody");
+      
+      if (!tbody) {
+        console.error('Table body not found');
+        return;
+      }
+      
+      tbody.innerHTML = "";
+
+      if (requestsToRender.length === 0) {
+        const emptyMessage = requests.length === 0 ? "No requests found" : "No requests match your criteria";
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-state">
+              <div class="empty-icon">📋</div>
+              <div class="empty-message">${emptyMessage}</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      requestsToRender.forEach((request, index) => {
+        const row = document.createElement('tr');
+        const status = request.status || 'Pending';
+        const requestId = request._id ? request._id.substring(0, 8) + '...' : 'N/A';
+        
+        row.innerHTML = `
+          <td>${requestId}</td>
+          <td>${request.studentName || 'N/A'}</td>
+          <td>${request.regNumber || 'N/A'}</td>
+          <td>${request.feeType || 'N/A'}</td>
+          <td>${request.amount || 0}</td>
+          <td>${getStatusBadge(status)}</td>
+          <td>${request.faculty || 'N/A'}</td>
+          <td><button class="select-btn" onclick="showDetails(${index})">View Details</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      loadRequests();
+      
+      // Add real-time search
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', applyFilters);
+      }
+      
+      // Add status filter change listener
+      const statusFilter = document.getElementById('statusFilter');
+      if (statusFilter) {
+        statusFilter.addEventListener('change', applyFilters);
+      }
+    });
+
+    document.getElementById('hodForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!selectedRequest) {
+        showMessage('Please select a request first.', 'error');
+        return;
+      }
+      
+      const requestId = document.getElementById('requestId').value.trim();
+      const status = document.getElementById('status').value;
+      const faculty = document.getElementById('faculty').value.trim();
+      const reason = document.getElementById('reason').value.trim();
+
+      // Validation
+      if (!requestId) {
+        showMessage('Request ID is required.', 'error');
+        return;
+      }
+
+      if (status === 'Rejected' && !reason) {
+        showMessage('Reason is required for rejection.', 'error');
+        return;
+      }
+
+      if (!faculty) {
+        showMessage('Faculty name is required.', 'error');
+        return;
+      }
+
+      // Add loading state
+      const form = e.target;
+      const submitBtn = form.querySelector('.submit-btn');
+      const originalText = submitBtn.textContent;
+      
+      submitBtn.textContent = 'Updating...';
+      submitBtn.disabled = true;
+      form.classList.add('loading');
+
+      try {
+        const response = await fetch('/faculty/update', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            id: requestId, 
+            status, 
+            reason, 
+            faculty 
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Server error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        showMessage(result.message || 'Request updated successfully!');
+        
+        // Refresh data and clear form
+        await loadRequests();
+        hideDetails();
+        
+        // Clear any active filters to show updated data
+        clearFilters();
+        
+      } catch (error) {
+        console.error('Error updating request:', error);
+        showMessage(`Failed to update request: ${error.message}`, 'error');
+      } finally {
+        // Remove loading state
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        form.classList.remove('loading');
+      }
+    });
+
+    // Add keyboard shortcut for clearing details
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && selectedRequest) {
+        hideDetails();
+      }
+    });
+
+    // Auto-refresh data every 30 seconds
+    setInterval(() => {
+      if (document.visibilityState === 'visible' && !document.querySelector('.loading')) {
+        loadRequests();
+      }
+    }, 30000);
+
+    // Add form validation
+    const statusSelect = document.getElementById('status');
+    if (statusSelect) {
+      statusSelect.addEventListener('change', function() {
+        const reasonField = document.getElementById('reason');
+        if (this.value === 'Rejected') {
+          reasonField.placeholder = 'Reason for rejection (required)';
+          reasonField.style.borderColor = '#ef4444';
+        } else {
+          reasonField.placeholder = 'Reason for status change (optional)';
+          reasonField.style.borderColor = '#e1e5e9';
+        }
+      });
+    }
+
+    // Handle connection errors gracefully
+    window.addEventListener('online', () => {
+      showMessage('Connection restored. Refreshing data...', 'success');
+      loadRequests();
+    });
+
+    window.addEventListener('offline', () => {
+      showMessage('Connection lost. Some features may not work.', 'error');
+    });
+
+    // Initialize page
+    window.addEventListener('load', () => {
+      console.log('HOD Dashboard loaded successfully');
+    });
+  </script>
+</body>
+</html>

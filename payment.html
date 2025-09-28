@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Page Header */
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+      color: white;
+    }
+
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .page-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 300;
+    }
+
+    /* Cards */
+    .card {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent, rgba(255, 255, 255, 0.1));
+      animation: shimmer 4s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) translateY(-100%); }
+      100% { transform: translateX(100%) translateY(100%); }
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .card:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    /* Amount Display */
+    .amount-display {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .amount-text {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 10px;
+    }
+
+    .amount-value {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+    }
+
+    .payment-status {
+      padding: 15px 25px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .status-approved {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+      border: 2px solid rgba(16, 185, 129, 0.3);
+      color: #059669;
+    }
+
+    .status-error {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+      border: 2px solid rgba(239, 68, 68, 0.3);
+      color: #dc2626;
+    }
+
+    /* Security Badge */
+    .security-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 25px;
+      color: #059669;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .security-icon {
+      font-size: 18px;
+    }
+
+    /* Form Styling */
+    .payment-form {
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-title {
+      color: #1a1a2e;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .form-title::after {
+      content: '';
+      width: 50px;
+      height: 3px;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      display: block;
+      margin: 10px auto 0;
+      border-radius: 2px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 15px 20px;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .form-input::placeholder {
+      color: #9ca3af;
+      font-weight: 400;
+    }
+
+    /* Card Input Styling */
+    .card-input {
+      position: relative;
+    }
+
+    .card-input::after {
+      content: '💳';
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      pointer-events: none;
+    }
+
+    .expiry-input {
+      position: relative;
+    }
+
+    .expiry-input::after {
+      content: '📅';
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    .cvv-input {
+      position: relative;
+    }
+
+    .cvv-input::after {
+      content: '🔒';
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    /* Payment Button */
+    .pay-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 20px;
+    }
+
+    .pay-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 40px rgba(16, 185, 129, 0.4);
+    }
+
+    .pay-btn:active {
+      transform: translateY(-1px);
+    }
+
+    .pay-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .pay-btn:hover::before {
+      left: 100%;
+    }
+
+    .pay-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .pay-btn:disabled::before {
+      display: none;
+    }
+
+    /* Loading State */
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    /* Back Button */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 12px 20px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateX(-5px);
+    }
+
+    /* Floating Shapes */
+    .floating-shapes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .shape {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .shape:nth-child(1) {
+      width: 80px;
+      height: 80px;
+      top: 20%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .shape:nth-child(2) {
+      width: 120px;
+      height: 120px;
+      top: 70%;
+      right: 10%;
+      animation-delay: 2s;
+    }
+
+    .shape:nth-child(3) {
+      width: 60px;
+      height: 60px;
+      top: 50%;
+      left: 85%;
+      animation-delay: 4s;
+    }
+
+    .shape:nth-child(4) {
+      width: 100px;
+      height: 100px;
+      top: 30%;
+      left: 30%;
+      animation-delay: 1s;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-30px) rotate(180deg);
+      }
+    }
+
+    /* Success Animation */
+    .success-checkmark {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: block;
+      stroke-width: 3;
+      stroke: #10b981;
+      stroke-miterlimit: 10;
+      margin: 20px auto;
+      box-shadow: inset 0px 0px 0px #10b981;
+      animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
+    }
+
+    .checkmark-circle {
+      stroke-dasharray: 166;
+      stroke-dashoffset: 166;
+      stroke-width: 3;
+      stroke-miterlimit: 10;
+      stroke: #10b981;
+      fill: none;
+      animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+
+    .checkmark-check {
+      transform-origin: 50% 50%;
+      stroke-dasharray: 48;
+      stroke-dashoffset: 48;
+      animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+    }
+
+    @keyframes stroke {
+      100% {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    @keyframes scale {
+      0%, 100% {
+        transform: none;
+      }
+      50% {
+        transform: scale3d(1.1, 1.1, 1);
+      }
+    }
+
+    @keyframes fill {
+      100% {
+        box-shadow: inset 0px 0px 0px 30px #10b981;
+      }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 15px;
+      }
+      
+      .page-title {
+        font-size: 2rem;
+      }
+      
+      .card {
+        padding: 25px;
+        margin-bottom: 20px;
+      }
+      
+      .amount-value {
+        font-size: 2.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 15px;
+      }
+      
+      .page-title {
+        font-size: 1.5rem;
+      }
+      
+      .card {
+        padding: 20px;
+      }
+      
+      .amount-value {
+        font-size: 2rem;
+      }
+    }
+
+    /* Form Validation */
+    .form-input:invalid:not(:placeholder-shown) {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .form-input:valid:not(:placeholder-shown) {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    /* Error Message */
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid rgba(239, 68, 68, 0.3);
+      color: #dc2626;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    /* Success Message */
+    .success-message {
+      background: rgba(16, 185, 129, 0.1);
+      border: 2px solid rgba(16, 185, 129, 0.3);
+      color: #059669;
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 25px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+
+  <div class="container">
+    <a href="javascript:history.back()" class="back-btn">
+      ← Back to Dashboard
+    </a>
+
+    <div class="page-header">
+      <h1 class="page-title">Secure Payment</h1>
+      <p class="page-subtitle">Complete your fee payment safely and securely</p>
+    </div>
+
+    <div id="messageContainer"></div>
+
+    <div class="card">
+      <div id="amountDisplay" class="amount-display">
+        <div class="amount-text">Loading payment details...</div>
+      </div>
+    </div>
+
+    <div class="card" id="paymentCard">
+      <div class="security-badge">
+        <span class="security-icon">🔒</span>
+        <span>Your payment information is encrypted and secure</span>
+      </div>
+
+      <h2 class="form-title">Payment Information</h2>
+      
+      <form id="paymentForm" class="payment-form">
+        <div class="form-group card-input">
+          <label class="form-label">Card Number</label>
+          <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" required class="form-input" maxlength="19">
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div class="form-group expiry-input">
+            <label class="form-label">Expiry Date</label>
+            <input type="text" id="expiryDate" placeholder="MM/YY" required class="form-input" maxlength="5">
+          </div>
+          
+          <div class="form-group cvv-input">
+            <label class="form-label">CVV</label>
+            <input type="text" id="cvv" placeholder="123" required class="form-input" maxlength="4">
+          </div>
+        </div>
+        
+        <button type="submit" class="pay-btn" id="payButton">
+          🔒 Pay Securely
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+  function showMessage(text, type = 'success') {
+    const container = document.getElementById('messageContainer');
+    const message = document.createElement('div');
+    message.className = type === 'success' ? 'success-message' : 'error-message';
+    message.innerHTML = text;
+    container.appendChild(message);
+    
+    setTimeout(() => {
+      if (container.contains(message)) {
+        container.removeChild(message);
+      }
+    }, 6000);
+  }
+
+  function formatCardNumber(value) {
+    // Remove all non-digit characters
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    // Add a space every 4 digits
+    const matches = v.match(/\d{4,16}/g);
+    const match = matches && matches[0] || '';
+    const parts = [];
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+    if (parts.length) {
+      return parts.join(' ');
+    } else {
+      return v;
+    }
+  }
+
+  function formatExpiryDate(value) {
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    if (v.length >= 2) {
+      return v.substring(0, 2) + '/' + v.substring(2, 4);
+    }
+    return v;
+  }
+
+  // Format card inputs
+  document.getElementById('cardNumber').addEventListener('input', function(e) {
+    e.target.value = formatCardNumber(e.target.value);
+  });
+
+  document.getElementById('expiryDate').addEventListener('input', function(e) {
+    e.target.value = formatExpiryDate(e.target.value);
+  });
+
+  document.getElementById('cvv').addEventListener('input', function(e) {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+  });
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const requestId = urlParams.get('requestId');
+  
+  if (requestId) {
+    async function loadRequest() {
+      try {
+        const res = await fetch(`/request/${requestId}`);
+        const data = await res.json();
+        const amountDisplay = document.getElementById("amountDisplay");
+        
+        if (data.status === "Approved") {
+          amountDisplay.innerHTML = `
+            <div class="payment-status status-approved">
+              ✅ Payment Approved
+            </div>
+            <div class="amount-text">Amount to Pay</div>
+            <div class="amount-value">$${data.amount}</div>
+            <div style="color: #6b7280; font-size: 14px;">
+              Fee Type: ${data.feeType} | Registration: ${data.regNumber}
+            </div>
+          `;
+        } else {
+          amountDisplay.innerHTML = `
+            <div class="payment-status status-error">
+              ❌ Request not approved for payment
+            </div>
+          `;
+          document.getElementById("paymentCard").style.display = "none";
+        }
+      } catch (err) {
+        console.error("Failed to load request:", err);
+        showMessage("Failed to load payment details. Please try again.", 'error');
+      }
+    }
+    loadRequest();
+  } else {
+    document.getElementById("amountDisplay").innerHTML = `
+      <div class="payment-status status-error">
+        ❌ No request ID provided
+      </div>
+    `;
+    document.getElementById("paymentCard").style.display = "none";
+  }
+
+  document.getElementById("paymentForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    if (!requestId) {
+      showMessage("No request available for payment.", 'error');
+      return;
+    }
+
+    // Validate form inputs
+    const cardNumber = document.getElementById("cardNumber").value.replace(/\s/g, '');
+    const expiryDate = document.getElementById("expiryDate").value;
+    const cvv = document.getElementById("cvv").value;
+
+    if (cardNumber.length < 13 || cardNumber.length > 19) {
+      showMessage("Please enter a valid card number.", 'error');
+      return;
+    }
+
+    if (!/^\d{2}\/\d{2}$/.test(expiryDate)) {
+      showMessage("Please enter a valid expiry date (MM/YY).", 'error');
+      return;
+    }
+
+    if (cvv.length < 3 || cvv.length > 4) {
+      showMessage("Please enter a valid CVV.", 'error');
+      return;
+    }
+
+    // Add loading state
+    const form = e.target;
+    const payButton = document.getElementById('payButton');
+    const originalText = payButton.innerHTML;
+    
+    payButton.innerHTML = '⏳ Processing Payment...';
+    payButton.disabled = true;
+    form.classList.add('loading');
+
+    try {
+      const res = await fetch("/pay-fee", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestId })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok && data.message) {
+        // Show success animation
+        const amountDisplay = document.getElementById("amountDisplay");
+        amountDisplay.innerHTML = `
+          <svg class="success-checkmark" viewBox="0 0 52 52">
+            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark-check" fill="none" d="m14.1 27.2l7.1 7.2 16.7-16.8"/>
+          </svg>
+          <div class="payment-status status-approved">
+            🎉 Payment Successful!
+          </div>
+          <div style="color: #6b7280; margin-top: 15px;">
+            Redirecting to dashboard in 3 seconds...
+          </div>
+        `;
+        
+        document.getElementById("paymentCard").style.display = "none";
+        
+        setTimeout(() => {
+          window.location.href = "main.html";
+        }, 3000);
+        
+      } else {
+        showMessage(data.error || 'Payment failed. Please try again.', 'error');
+      }
+    } catch (error) {
+      console.error("Payment failed:", error);
+      showMessage("Network error. Please check your connection and try again.", 'error');
+    } finally {
+      // Remove loading state
+      payButton.innerHTML = originalText;
+      payButton.disabled = false;
+      form.classList.remove('loading');
+    }
+  });
+
+  // Add form validation feedback
+  document.querySelectorAll('.form-input').forEach(input => {
+    input.addEventListener('blur', function() {
+      if (this.hasAttribute('required') && !this.value.trim()) {
+        this.style.borderColor = '#ef4444';
+      } else if (this.value.trim()) {
+        this.style.borderColor = '#10b981';
+      } else {
+        this.style.borderColor = '#e1e5e9';
+      }
+    });
+  });
+
+  // Prevent form submission on Enter in input fields (except the last one)
+  document.querySelectorAll('.form-input').forEach((input, index, inputs) => {
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (index < inputs.length - 1) {
+          inputs[index + 1].focus();
+        } else {
+          document.getElementById('payButton').click();
+        }
+      }
+    });
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Faculty Approval</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+      color: white;
+    }
+
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .page-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 300;
+    }
+
+    .card {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent, rgba(255, 255, 255, 0.1));
+      animation: shimmer 4s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) translateY(-100%); }
+      100% { transform: translateX(100%) translateY(100%); }
+    }
+
+    .section-title {
+      color: #1a1a2e;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-title::after {
+      content: '';
+      width: 40px;
+      height: 3px;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      display: block;
+      margin-top: 8px;
+      border-radius: 2px;
+    }
+
+    /* Table Styling */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .requests-table {
+      width: 100%;
+      background: white;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    .requests-table thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .requests-table th {
+      padding: 15px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .requests-table td {
+      padding: 15px 12px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .requests-table tr:hover {
+      background-color: rgba(102, 126, 234, 0.05);
+      transform: scale(1.01);
+    }
+
+    .requests-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .select-btn {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .select-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Details Card */
+    .details-card {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-left: 4px solid #667eea;
+      position: relative;
+      z-index: 1;
+    }
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+      font-size: 14px;
+    }
+
+    .detail-item:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #374151;
+      flex: 1;
+    }
+
+    .detail-value {
+      color: #667eea;
+      font-weight: 500;
+      flex: 2;
+      text-align: right;
+    }
+
+    .hide-btn {
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 15px;
+    }
+
+    .hide-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(107, 114, 128, 0.4);
+    }
+
+    /* Form Styling */
+    .approval-form {
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 15px 18px;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 15px 18px;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(16, 185, 129, 0.4);
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .submit-btn:hover::before {
+      left: 100%;
+    }
+
+    /* Loading States */
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .loading .submit-btn {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    .empty-message {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    /* Floating shapes */
+    .floating-shapes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .shape {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .shape:nth-child(1) {
+      width: 80px;
+      height: 80px;
+      top: 10%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .shape:nth-child(2) {
+      width: 120px;
+      height: 120px;
+      top: 70%;
+      right: 10%;
+      animation-delay: 2s;
+    }
+
+    .shape:nth-child(3) {
+      width: 60px;
+      height: 60px;
+      top: 50%;
+      left: 85%;
+      animation-delay: 4s;
+    }
+
+    .shape:nth-child(4) {
+      width: 100px;
+      height: 100px;
+      top: 30%;
+      left: 20%;
+      animation-delay: 1s;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-30px) rotate(180deg);
+      }
+    }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+      background: rgba(251, 191, 36, 0.2);
+      color: #d97706;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .status-approved {
+      background: rgba(16, 185, 129, 0.2);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-rejected {
+      background: rgba(239, 68, 68, 0.2);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .status-paid {
+      background: rgba(59, 130, 246, 0.2);
+      color: #1d4ed8;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 10px;
+      }
+      
+      .page-title {
+        font-size: 2rem;
+      }
+      
+      .card {
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      
+      .requests-table th,
+      .requests-table td {
+        padding: 10px 8px;
+        font-size: 13px;
+      }
+      
+      .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+      
+      .detail-value {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .page-title {
+        font-size: 1.5rem;
+      }
+      
+      .card {
+        padding: 15px;
+      }
+    }
+
+    /* Animation for cards appearing */
+    .card {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .card:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+
+    .card:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+
+    .card:nth-child(4) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Success/Error Messages */
+    .message {
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-weight: 500;
+      position: relative;
+      z-index: 1;
+    }
+
+    .message.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: #059669;
+    }
+
+    .message.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #dc2626;
+    }
+  </style>
+</head>
+<body>
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Faculty Approval</h1>
+      <p class="page-subtitle">Review and manage student fee requests</p>
+    </div>
+
+    <div id="messageContainer"></div>
+
+    <div class="card">
+      <h2 class="section-title">All Fee Requests</h2>
+      <div class="table-container">
+        <table class="requests-table">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Student Name</th>
+              <th>Reg Number</th>
+              <th>Fee Type</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="requestsTableBody">
+            <tr>
+              <td colspan="7" class="empty-state">
+                <div class="empty-icon">📋</div>
+                <div class="empty-message">Loading requests...</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="selectedDetails" class="card details-card hidden">
+      <h2 class="section-title">Selected Student Details</h2>
+      <div class="space-y-2">
+        <div class="detail-item">
+          <span class="detail-label">Student Name:</span>
+          <span class="detail-value" id="detailStudentName"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Registration Number:</span>
+          <span class="detail-value" id="detailRegNumber"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Academic Year:</span>
+          <span class="detail-value" id="detailYear"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Branch:</span>
+          <span class="detail-value" id="detailBranch"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Section:</span>
+          <span class="detail-value" id="detailSection"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Fee Type:</span>
+          <span class="detail-value" id="detailFeeType"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Amount:</span>
+          <span class="detail-value" id="detailAmount"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">CRT Fee:</span>
+          <span class="detail-value" id="detailCrtFee"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Attendance:</span>
+          <span class="detail-value" id="detailAttendance"></span>
+        </div>
+      </div>
+      <button onclick="hideDetails()" class="hide-btn">Hide Details</button>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Approval Form</h2>
+      <form id="facultyForm" class="approval-form">
+        <div class="form-group">
+          <input type="text" id="requestId" placeholder="Request ID" required class="form-input" readonly>
+        </div>
+        <div class="form-group">
+          <select id="status" required class="form-select">
+            <option value="Approved">✅ Approve Request</option>
+            <option value="Rejected">❌ Reject Request</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <input type="text" id="faculty" placeholder="Faculty Name" class="form-input">
+        </div>
+        <div class="form-group">
+          <input type="text" id="reason" placeholder="Reason (required if rejected)" class="form-input">
+        </div>
+        <button type="submit" class="submit-btn">Update Request</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+  let selectedRequest = null;
+  let requests = [];
+
+  function showMessage(text, type = 'success') {
+    const container = document.getElementById('messageContainer');
+    const message = document.createElement('div');
+    message.className = `message ${type}`;
+    message.textContent = text;
+    container.appendChild(message);
+    
+    setTimeout(() => {
+      container.removeChild(message);
+    }, 5000);
+  }
+
+  function showDetails(index) {
+    const request = requests[index];
+    selectedRequest = request;
+    
+    document.getElementById("detailStudentName").textContent = request.studentName || 'N/A';
+    document.getElementById("detailRegNumber").textContent = request.regNumber || 'N/A';
+    document.getElementById("detailYear").textContent = request.year || 'N/A';
+    document.getElementById("detailBranch").textContent = request.branch || 'N/A';
+    document.getElementById("detailSection").textContent = request.section || 'N/A';
+    document.getElementById("detailFeeType").textContent = request.feeType || 'N/A';
+    document.getElementById("detailAmount").textContent = `$${request.amount || '0'}`;
+    document.getElementById("detailCrtFee").textContent = `$${request.crtFee || '0'}`;
+    document.getElementById("detailAttendance").textContent = `${request.attendance || '0'}%`;
+    
+    document.getElementById("requestId").value = request._id;
+    document.getElementById("status").value = "Approved";
+    document.getElementById("reason").value = "";
+    document.getElementById("faculty").value = "";
+    document.getElementById("selectedDetails").classList.remove("hidden");
+    
+    // Smooth scroll to details
+    document.getElementById("selectedDetails").scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'center'
+    });
+  }
+
+  function hideDetails() {
+    document.getElementById("selectedDetails").classList.add("hidden");
+    selectedRequest = null;
+    
+    // Clear form
+    document.getElementById("requestId").value = "";
+    document.getElementById("status").value = "Approved";
+    document.getElementById("reason").value = "";
+    document.getElementById("faculty").value = "";
+  }
+
+  async function loadRequests() {
+    try {
+      const res = await fetch("/all-requests");
+      requests = await res.json();
+      const tbody = document.getElementById("requestsTableBody");
+      tbody.innerHTML = "";
+      
+      if (requests.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="empty-state">
+              <div class="empty-icon">📋</div>
+              <div class="empty-message">No requests found</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      requests.forEach((request, index) => {
+        const statusClass = `status-${request.status.toLowerCase()}`;
+        const statusText = request.status || 'Pending';
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${request._id}</td>
+          <td>${request.studentName || 'N/A'}</td>
+          <td>${request.regNumber || 'N/A'}</td>
+          <td>${request.feeType || 'N/A'}</td>
+          <td>$${request.amount || '0'}</td>
+          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          <td><button onclick="showDetails(${index})" class="select-btn">Select</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      console.error("Failed to load requests:", err);
+      showMessage("Failed to load requests. Please try again.", 'error');
+    }
+  }
+
+  window.onload = () => {
+    loadRequests();
+  };
+
+  document.getElementById("facultyForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    if (!selectedRequest) {
+      showMessage("Please select a request first.", 'error');
+      return;
+    }
+    
+    const status = document.getElementById("status").value;
+    const reason = document.getElementById("reason").value;
+    const faculty = document.getElementById("faculty").value;
+    
+    // Validate required fields
+    if (status === "Rejected" && !reason.trim()) {
+      showMessage("Reason is required when rejecting a request.", 'error');
+      return;
+    }
+    
+    if (!faculty.trim()) {
+      showMessage("Faculty name is required.", 'error');
+      return;
+    }
+    
+    // Add loading state
+    const form = e.target;
+    const submitBtn = form.querySelector('.submit-btn');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.textContent = 'Processing...';
+    form.classList.add('loading');
+    
+    try {
+      const res = await fetch("/faculty/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: selectedRequest._id,
+          status: status,
+          reason: reason,
+          faculty: faculty
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok && data.message) {
+        showMessage(data.message, 'success');
+        loadRequests();
+        hideDetails();
+      } else {
+        showMessage(data.error || 'Failed to update request.', 'error');
+      }
+    } catch (err) {
+      console.error("Failed to update request:", err);
+      showMessage("Network error. Please try again.", 'error');
+    } finally {
+      // Remove loading state
+      submitBtn.textContent = originalText;
+      form.classList.remove('loading');
+    }
+  });
+
+  // Update reason field requirement based on status
+  document.getElementById("status").addEventListener("change", function() {
+    const reasonField = document.getElementById("reason");
+    const reasonLabel = reasonField.placeholder;
+    
+    if (this.value === "Rejected") {
+      reasonField.placeholder = "Reason for rejection (required)";
+      reasonField.style.borderColor = "#ef4444";
+    } else {
+      reasonField.placeholder = "Reason (optional)";
+      reasonField.style.borderColor = "#e1e5e9";
+    }
+  });
+  </script>
+</body>
+</html>

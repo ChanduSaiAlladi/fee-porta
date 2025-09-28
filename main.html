@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Navigation */
+    .nav-container {
+      backdrop-filter: blur(10px);
+      background: rgba(59, 130, 246, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border-radius: 16px;
+      padding: 20px 30px;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent, rgba(255, 255, 255, 0.1));
+      animation: shimmer 4s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) translateY(-100%); }
+      100% { transform: translateX(100%) translateY(100%); }
+    }
+
+    .nav-list {
+      display: flex;
+      gap: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav-item {
+      position: relative;
+    }
+
+    .nav-link {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 16px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.3);
+      font-weight: 600;
+    }
+
+    /* Page Header */
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+      color: white;
+    }
+
+    .welcome-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .welcome-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 300;
+    }
+
+    /* Cards */
+    .card {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent, rgba(255, 255, 255, 0.1));
+      animation: shimmer 4s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-title {
+      color: #1a1a2e;
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 25px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-title::after {
+      content: '';
+      width: 50px;
+      height: 3px;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      display: block;
+      margin-top: 10px;
+      border-radius: 2px;
+    }
+
+    /* Form Styling */
+    .fee-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input {
+      padding: 15px 18px;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .form-select {
+      padding: 15px 18px;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .submit-btn {
+      grid-column: 1 / -1;
+      padding: 18px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .submit-btn:hover::before {
+      left: 100%;
+    }
+
+    /* Success Message */
+    .success-message {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+      border: 2px solid rgba(16, 185, 129, 0.3);
+      color: #059669;
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 25px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 16px;
+      position: relative;
+      z-index: 1;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+
+    .success-message.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Status Section */
+    .status-check {
+      display: flex;
+      gap: 15px;
+      align-items: end;
+      margin-bottom: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .status-input-group {
+      flex: 1;
+    }
+
+    .check-btn {
+      padding: 15px 25px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .check-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Status Result */
+    .status-result {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 15px;
+      padding: 25px;
+      position: relative;
+      z-index: 1;
+      border: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .status-item:last-child {
+      border-bottom: none;
+    }
+
+    .status-label {
+      font-weight: 600;
+      color: #374151;
+      flex: 1;
+    }
+
+    .status-value {
+      color: #667eea;
+      font-weight: 500;
+      flex: 2;
+      text-align: right;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-approved {
+      background: rgba(16, 185, 129, 0.2);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-rejected {
+      background: rgba(239, 68, 68, 0.2);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .status-pending {
+      background: rgba(251, 191, 36, 0.2);
+      color: #d97706;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .pay-btn {
+      margin-top: 20px;
+      padding: 15px 30px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .pay-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Floating Shapes */
+    .floating-shapes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .shape {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .shape:nth-child(1) {
+      width: 80px;
+      height: 80px;
+      top: 15%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .shape:nth-child(2) {
+      width: 120px;
+      height: 120px;
+      top: 70%;
+      right: 15%;
+      animation-delay: 2s;
+    }
+
+    .shape:nth-child(3) {
+      width: 60px;
+      height: 60px;
+      top: 45%;
+      left: 85%;
+      animation-delay: 4s;
+    }
+
+    .shape:nth-child(4) {
+      width: 100px;
+      height: 100px;
+      top: 25%;
+      left: 25%;
+      animation-delay: 1s;
+    }
+
+    .shape:nth-child(5) {
+      width: 90px;
+      height: 90px;
+      top: 60%;
+      left: 60%;
+      animation-delay: 3s;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-30px) rotate(180deg);
+      }
+    }
+
+    /* Loading State */
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .loading .submit-btn,
+    .loading .check-btn {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    /* Hidden State */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 10px;
+      }
+      
+      .welcome-title {
+        font-size: 2rem;
+      }
+      
+      .card {
+        padding: 25px;
+        margin-bottom: 20px;
+      }
+      
+      .fee-form {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .nav-list {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .status-check {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+      }
+      
+      .status-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      
+      .status-value {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .welcome-title {
+        font-size: 1.5rem;
+      }
+      
+      .card {
+        padding: 20px;
+      }
+      
+      .nav-container {
+        padding: 15px 20px;
+      }
+    }
+
+    /* Form Validation */
+    .form-input:invalid:not(:placeholder-shown) {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .form-input:valid:not(:placeholder-shown) {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    /* Error Message */
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid rgba(239, 68, 68, 0.3);
+      color: #dc2626;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 20px;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    .empty-message {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+
+  <div class="container">
+    <nav class="nav-container">
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="#" onclick="showSection('feeFormSection')" class="nav-link active" id="nav-fee-form">
+            📝 Submit Fee Request
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" onclick="showSection('statusSection')" class="nav-link" id="nav-status">
+            📊 Check Status
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="page-header">
+      <h1 class="welcome-title">Student Dashboard</h1>
+      <p class="welcome-subtitle">Manage your fee requests and track their status</p>
+    </div>
+
+    <div id="messageContainer"></div>
+
+    <div id="feeFormSection" class="card">
+      <h2 class="section-title">Submit Fee Request</h2>
+      <form id="feeForm" class="fee-form">
+        <div class="form-group">
+          <label class="form-label">Student Name</label>
+          <input type="text" id="studentName" placeholder="Enter your full name" required class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Registration Number</label>
+          <input type="text" id="regNumber" placeholder="Enter registration number" required class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Academic Year</label>
+          <input type="text" id="year" placeholder="e.g., 2024-2025" required class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Branch</label>
+          <input type="text" id="branch" placeholder="e.g., Computer Science" required class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Section</label>
+          <input type="text" id="section" placeholder="e.g., A, B, C" required class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fee Type</label>
+          <select id="feeType" required class="form-select">
+            <option value="">Select fee type</option>
+            <option value="semester">Semester Fee</option>
+            <option value="minor">Minor Fee</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount ($)</label>
+          <input type="number" id="amount" placeholder="Enter amount" required class="form-input" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CRT Fee ($)</label>
+          <input type="number" id="crtFee" placeholder="Enter CRT fee (optional)" class="form-input" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Attendance (%)</label>
+          <input type="text" id="attendance" placeholder="Enter attendance percentage" class="form-input">
+        </div>
+        <button type="submit" class="submit-btn">Submit Request</button>
+      </form>
+      <div id="successMessage" class="success-message hidden">
+        🎉 Request submitted successfully! You can track its status using the Check Status section.
+      </div>
+    </div>
+
+    <div id="statusSection" class="card hidden">
+      <h2 class="section-title">Check Request Status</h2>
+      <div class="status-check">
+        <div class="status-input-group">
+          <label class="form-label">Registration Number</label>
+          <input type="text" id="statusRegNumber" placeholder="Enter your registration number" class="form-input">
+        </div>
+        <button onclick="checkStatus()" class="check-btn">🔍 Check Status</button>
+      </div>
+      <div id="statusResult" class="status-result" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+  let activeSection = 'feeFormSection';
+
+  function showMessage(text, type = 'success') {
+    const container = document.getElementById('messageContainer');
+    const message = document.createElement('div');
+    message.className = type === 'success' ? 'success-message show' : 'error-message';
+    message.textContent = text;
+    container.appendChild(message);
+    
+    setTimeout(() => {
+      if (container.contains(message)) {
+        container.removeChild(message);
+      }
+    }, 5000);
+  }
+
+  function showSection(sectionId) {
+    // Hide all sections
+    document.getElementById('feeFormSection').classList.add('hidden');
+    document.getElementById('statusSection').classList.add('hidden');
+    
+    // Remove active class from all nav links
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.classList.remove('active');
+    });
+    
+    // Show selected section
+    document.getElementById(sectionId).classList.remove('hidden');
+    activeSection = sectionId;
+    
+    // Add active class to corresponding nav link
+    const navId = sectionId === 'feeFormSection' ? 'nav-fee-form' : 'nav-status';
+    document.getElementById(navId).classList.add('active');
+  }
+
+  document.getElementById("feeForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    // Validate required fields
+    const requiredFields = ['studentName', 'regNumber', 'year', 'branch', 'section', 'feeType', 'amount'];
+    const missingFields = requiredFields.filter(fieldId => {
+      const field = document.getElementById(fieldId);
+      return !field.value.trim();
+    });
+    
+    if (missingFields.length > 0) {
+      showMessage('Please fill in all required fields.', 'error');
+      return;
+    }
+    
+    // Add loading state
+    const form = e.target;
+    const submitBtn = form.querySelector('.submit-btn');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.textContent = 'Submitting...';
+    form.classList.add('loading');
+    
+    try {
+      const res = await fetch("/request-fee", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentName: document.getElementById("studentName").value,
+          regNumber: document.getElementById("regNumber").value,
+          year: document.getElementById("year").value,
+          branch: document.getElementById("branch").value,
+          section: document.getElementById("section").value,
+          feeType: document.getElementById("feeType").value,
+          amount: parseFloat(document.getElementById("amount").value),
+          crtFee: parseFloat(document.getElementById("crtFee").value) || 0,
+          attendance: document.getElementById("attendance").value
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok && data.message) {
+        document.getElementById("successMessage").classList.remove('hidden');
+        document.getElementById("feeForm").reset();
+        
+        // Auto-hide success message after 5 seconds
+        setTimeout(() => {
+          document.getElementById("successMessage").classList.add('hidden');
+        }, 5000);
+      } else {
+        showMessage(data.error || 'Failed to submit request. Please try again.', 'error');
+      }
+    } catch (error) {
+      showMessage('Network error. Please check your connection and try again.', 'error');
+    } finally {
+      // Remove loading state
+      submitBtn.textContent = originalText;
+      form.classList.remove('loading');
+    }
+  });
+
+  async function checkStatus() {
+    const regNumber = document.getElementById("statusRegNumber").value.trim();
+    
+    if (!regNumber) {
+      showMessage("Please enter your registration number.", 'error');
+      return;
+    }
+    
+    // Add loading state
+    const checkBtn = document.querySelector('.check-btn');
+    const originalText = checkBtn.textContent;
+    checkBtn.textContent = '⏳ Checking...';
+    checkBtn.disabled = true;
+    
+    try {
+      const res = await fetch(`/status/${regNumber}`);
+      const data = await res.json();
+      const resultDiv = document.getElementById("statusResult");
+      
+      if (data.status === "Not Found") {
+        resultDiv.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📄</div>
+            <div class="empty-message">No request found for registration number: ${regNumber}</div>
+          </div>
+        `;
+      } else {
+        // Determine status badge class
+        let statusClass = 'status-pending';
+        if (data.status === 'Approved') statusClass = 'status-approved';
+        else if (data.status === 'Rejected') statusClass = 'status-rejected';
+        
+        let html = `
+          <div class="status-item">
+            <span class="status-label">Status:</span>
+            <span class="status-badge ${statusClass}">${data.status}</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Fee Type:</span>
+            <span class="status-value">${data.feeType || 'N/A'}</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Amount:</span>
+            <span class="status-value">$${data.amount || '0'}</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">CRT Fee:</span>
+            <span class="status-value">$${data.crtFee || '0'}</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Attendance:</span>
+            <span class="status-value">${data.attendance || 'N/A'}%</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Reason:</span>
+            <span class="status-value">${data.reason || 'N/A'}</span>
+          </div>
+        `;
+        
+        if (data.status === "Approved") {
+          html += `<button onclick="payFee('${data._id}')" class="pay-btn">💳 Proceed to Payment</button>`;
+        }
+        
+        resultDiv.innerHTML = html;
+      }
+      
+      resultDiv.style.display = 'block';
+      
+      // Smooth scroll to results
+      resultDiv.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'center'
+      });
+      
+    } catch (error) {
+      showMessage('Failed to check status. Please try again.', 'error');
+    } finally {
+      // Remove loading state
+      checkBtn.textContent = originalText;
+      checkBtn.disabled = false;
+    }
+  }
+
+  function payFee(requestId) {
+    // Add a confirmation before redirecting
+    if (confirm('You will be redirected to the payment page. Continue?')) {
+      window.location.href = `payment.html?requestId=${requestId}`;
+    }
+  }
+
+  // Add form validation feedback
+  document.querySelectorAll('.form-input').forEach(input => {
+    input.addEventListener('blur', function() {
+      if (this.hasAttribute('required') && !this.value.trim()) {
+        this.style.borderColor = '#ef4444';
+      } else if (this.value.trim()) {
+        this.style.borderColor = '#10b981';
+      } else {
+        this.style.borderColor = '#e1e5e9';
+      }
+    });
+    
+    input.addEventListener('input', function() {
+      if (this.style.borderColor === 'rgb(239, 68, 68)' && this.value.trim()) {
+        this.style.borderColor = '#e1e5e9';
+      }
+    });
+  });
+
+  // Add keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Tab' && e.shiftKey) {
+      // Handle shift+tab navigation
+    } else if (e.key === 'Tab') {
+      // Handle tab navigation
+    } else if (e.key === 'Enter' && e.target.classList.contains('form-input')) {
+      // Move to next input on Enter
+      const inputs = Array.from(document.querySelectorAll('.form-input, .form-select'));
+      const currentIndex = inputs.indexOf(e.target);
+      if (currentIndex < inputs.length - 1) {
+        inputs[currentIndex + 1].focus();
+      }
+    }
+  });
+  </script>
+</body>
+</html>
