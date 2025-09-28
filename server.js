@@ -9,6 +9,11 @@ import { fileURLToPath } from "url";
 
 const app = express();
 app.use(bodyParser.json());
+// Connect to DB on first request
+app.use((req, res, next) => {
+  connectDB().then(next).catch(next);
+});
+
 app.use(cors());
 
 // Static frontend
@@ -16,13 +21,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.static(__dirname));
 
-// MongoDB connection
-const mongoUri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/feeportal";
-mongoose.connect(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.error(err));
+let dbConnected = false;
+
+// Lazy MongoDB connection
+const connectDB = async () => {
+  if (dbConnected) return;
+  try {
+    const mongoUri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/feeportal";
+    await mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("✅ MongoDB Connected");
+    dbConnected = true;
+  } catch (err) {
+    console.error("MongoDB connection error:", err);
+  }
+};
 
 // Schemas
 const userSchema = new mongoose.Schema({
