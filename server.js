@@ -16,10 +16,38 @@ app.use((req, res, next) => {
 
 app.use(cors());
 
-// Static frontend
+// Frontend routes - explicit file serving
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use(express.static(__dirname));
+
+// Serve HTML files explicitly
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'signup.html'));
+});
+
+app.get('/signup.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'signup.html'));
+});
+
+app.get('/login.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'login.html'));
+});
+
+app.get('/main.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'main.html'));
+});
+
+app.get('/payment.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'payment.html'));
+});
+
+app.get('/faculty.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'faculty.html'));
+});
+
+app.get('/hod.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'hod.html'));
+});
 
 let dbConnected = false;
 
@@ -191,10 +219,7 @@ app.post("/pay-fee", async (req, res) => {
   }
 });
 
-// Root route - redirect to signup
-app.get("/", (req, res) => {
-  res.redirect("/signup.html");
-});
+// Remove root redirect as it's now handled by explicit route
 
 // Start server locally
 const PORT = process.env.PORT || 3000;
