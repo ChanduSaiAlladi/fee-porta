@@ -819,7 +819,7 @@
 
     async function loadRequests() {
       try {
-        const response = await fetch('/all-requests');
+        const response = await fetch('/api/all-requests');
         
         if (!response.ok) {
           throw new Error(`Server error: ${response.status}`);
@@ -1008,7 +1008,7 @@
       form.classList.add('loading');
 
       try {
-        const response = await fetch('/faculty/update', {
+        const response = await fetch('/api/faculty/update', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json'

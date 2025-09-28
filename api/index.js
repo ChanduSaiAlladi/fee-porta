@@ -4,8 +4,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import bodyParser from "body-parser";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
 
 const app = express();
 app.use(bodyParser.json());
@@ -15,11 +13,6 @@ app.use((req, res, next) => {
 });
 
 app.use(cors());
-
-// Static frontend for local
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-app.use(express.static(__dirname));
 
 let dbConnected = false;
 
@@ -191,16 +184,5 @@ app.post("/api/pay-fee", async (req, res) => {
   }
 });
 
-// Root route - redirect to signup
-app.get("/", (req, res) => {
-  res.redirect("/signup.html");
-});
-
-// Start server locally
-const PORT = process.env.PORT || 3000;
-if (process.argv[1] === __filename) {
-  app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
-}
-
-// For Vercel serverless (but since we're using api/index.js, this is for local only)
+// For Vercel serverless
 export default app;

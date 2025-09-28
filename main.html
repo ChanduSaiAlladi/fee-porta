@@ -736,7 +736,7 @@
     form.classList.add('loading');
     
     try {
-      const res = await fetch("/request-fee", {
+      const res = await fetch("/api/request-fee", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -789,7 +789,7 @@
     checkBtn.disabled = true;
     
     try {
-      const res = await fetch(`/status/${regNumber}`);
+      const res = await fetch(`/api/status/${regNumber}`);
       const data = await res.json();
       const resultDiv = document.getElementById("statusResult");
       

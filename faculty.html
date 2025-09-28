@@ -674,7 +674,7 @@
 
   async function loadRequests() {
     try {
-      const res = await fetch("/all-requests");
+      const res = await fetch("/api/all-requests");
       requests = await res.json();
       const tbody = document.getElementById("requestsTableBody");
       tbody.innerHTML = "";
@@ -748,7 +748,7 @@
     form.classList.add('loading');
     
     try {
-      const res = await fetch("/faculty/update", {
+      const res = await fetch("/api/faculty/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

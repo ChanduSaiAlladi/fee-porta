@@ -645,7 +645,7 @@
   if (requestId) {
     async function loadRequest() {
       try {
-        const res = await fetch(`/request/${requestId}`);
+        const res = await fetch(`/api/request/${requestId}`);
         const data = await res.json();
         const amountDisplay = document.getElementById("amountDisplay");
         
@@ -721,7 +721,7 @@
     form.classList.add('loading');
 
     try {
-      const res = await fetch("/pay-fee", {
+      const res = await fetch("/api/pay-fee", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ requestId })
